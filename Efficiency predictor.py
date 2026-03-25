@@ -202,6 +202,27 @@ if __name__ == "__main__":
         report_df.to_csv('Classification_Report.csv', float_format='%.4f')
         print("\nClassification report saved to 'Classification_Report.csv' with four decimal points.")
         
+        # --- PREDICTION ON TEST SET (FOR MANUAL VERIFICATION) ---
+        print("\n--- RUNNING PREDICTION ON TEST SET ---")
+        test_predictions_raw = model.predict(X_test)
+        
+        # Map back to original labels for human readability
+        inv_efficiency_mapping = {0: 'Low', 1: 'Medium', 2: 'High'}
+        test_set['Predicted_Efficiency_Status_Label'] = [inv_efficiency_mapping[p] for p in test_predictions_raw]
+        
+        # Also include the numerical prediction if helpful
+        test_set['Predicted_Efficiency_Status_Value'] = [p/2.0 for p in test_predictions_raw]
+        
+        # Re-map the actual Efficiency_Status back to labels for easier comparison if they were mapped to 0, 0.5, 1.0
+        # In this script, test_set['Efficiency_Status'] is already 0.0, 0.5, 1.0 (from line 76 mapping)
+        # Let's add a label column for the actual status too
+        val_to_label = {0.0: 'Low', 0.5: 'Medium', 1.0: 'High'}
+        test_set['Actual_Efficiency_Status_Label'] = test_set['Efficiency_Status'].map(val_to_label)
+        
+        # Save the test set with predictions
+        test_set.to_csv('test_predictions.csv', index=False)
+        print("Test set predictions saved to 'test_predictions.csv' for manual verification.")
+        
     except ImportError as e:
         print(f"\nLibrary Missing Error: {e}")
         print("Please resolve this by running the following in your terminal:")
